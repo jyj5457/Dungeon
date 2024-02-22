@@ -10,11 +10,18 @@ public class MainCharacterController : MonoBehaviour
     // event 외부에서는 호출하지 못하게 막는다
     public event Action<Vector2> OnMoveEvent;
     public event Action<Vector2> OnLookEvent;
-    public event Action OnAttackEvent;
+    public event Action<AttackSO> OnAttackEvent;
 
     private float _timeSinceLastAttack = float.MaxValue;
 
     protected bool IsAttacking {  get; set; }
+
+    protected CharacterStatsHandler Stats {  get; private set; }
+
+    protected virtual void Awake()
+    {
+        Stats = GetComponent<CharacterStatsHandler>();
+    }
 
     protected virtual void Update()
     {
@@ -23,15 +30,18 @@ public class MainCharacterController : MonoBehaviour
 
     private void HandleAttackDelay()
     {
-        if(_timeSinceLastAttack <= 0.2f)
+        if (Stats.CurrentStates.attackSO == null)
+            return;
+
+        if(_timeSinceLastAttack <= Stats.CurrentStates.attackSO.delay)  //TODO
         {
             _timeSinceLastAttack += Time.deltaTime;
         }
 
-        if(IsAttacking && _timeSinceLastAttack > 0.2f)
+        if(IsAttacking && _timeSinceLastAttack > Stats.CurrentStates.attackSO.delay)
         {
             _timeSinceLastAttack = 0;
-            CallAttackEvent();
+            CallAttackEvent(Stats.CurrentStates.attackSO);
         }
     }
 
@@ -44,8 +54,8 @@ public class MainCharacterController : MonoBehaviour
     {
         OnLookEvent?.Invoke(direction);
     }
-    public void CallAttackEvent()
+    public void CallAttackEvent(AttackSO attackSO)
     {
-        OnAttackEvent?.Invoke();
+        OnAttackEvent?.Invoke(attackSO);
     }
 }

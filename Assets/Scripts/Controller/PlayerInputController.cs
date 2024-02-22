@@ -6,10 +6,13 @@ using UnityEngine.InputSystem;
 public class PlayerInputController : MainCharacterController
 {
     private Camera _camera;
-    private void Awake()
+
+    protected override void Awake()
     {
+        base.Awake();
         _camera = Camera.main;
     }
+
     public void OnMove(InputValue value)
     {
         Vector2 moveInput = value.Get<Vector2>().normalized;
